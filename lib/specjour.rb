@@ -7,23 +7,12 @@ module Specjour
   autoload :Dispatcher, 'specjour/dispatcher'
   autoload :Manager, 'specjour/manager'
   autoload :RsyncDaemon, 'specjour/rsync_daemon'
-  autoload :Worker, 'specjour/worker'
   autoload :Printer, 'specjour/printer'
   autoload :Protocol, 'specjour/protocol'
+  autoload :Worker, 'specjour/worker'
 
-  module Rspec
-    require 'spec'
-    require 'spec/runner/formatter/base_text_formatter'
-
-    autoload :DistributedFormatter, 'specjour/rspec/distributed_formatter'
-    autoload :FinalReport, 'specjour/rspec/final_report'
-    autoload :MarshalableFailureFormatter, 'specjour/rspec/marshalable_failure_formatter'
-  end
-
-  module Cucumber
-    require 'cucumber'
-    autoload :DistributedFormatter, 'specjour/cucumber/distributed_formatter'
-  end
+  autoload :Rspec, 'specjour/rspec'
+  autoload :Cucumber, 'specjour/cucumber'
 
   VERSION = "0.1.9".freeze
 end

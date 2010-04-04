@@ -14,10 +14,10 @@ module Specjour
     end
 
     def start
-      rsync_daemon.start
       gather_managers
       sync_managers
       bundle_install_managers
+      set_up_printer
       dispatch_work
       printer.join
     end
@@ -71,7 +71,6 @@ module Specjour
       end
       puts "Managers found: #{managers.size}"
       abort unless managers.size > 0
-      printer.worker_size = worker_size
     end
 
     def hostname
@@ -79,11 +78,7 @@ module Specjour
     end
 
     def printer
-      @printer ||= begin
-        p = Printer.new
-        p.specs_to_run = all_specs
-        p.start
-      end
+      @printer ||= Printer.new.start
     end
 
     def project_name
@@ -112,8 +107,15 @@ module Specjour
       at_exit { manager.kill_worker_processes }
     end
 
+    def set_up_printer
+      printer.specs_to_run = all_specs
+      printer.worker_size = worker_size
+    end
+
     def sync_managers
+      rsync_daemon.start
       command_managers { |manager| manager.sync }
+      rsync_daemon.stop
     end
 
     def wait_on_managers

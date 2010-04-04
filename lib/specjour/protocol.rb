@@ -15,7 +15,7 @@ module Specjour
       super dump_object(arg)
     end
 
-    def puts(arg)
+    def puts(arg="")
       print(arg << "\n")
     end
 
