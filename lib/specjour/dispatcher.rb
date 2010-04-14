@@ -51,12 +51,15 @@ module Specjour
     end
 
     def fetch_manager(uri)
-      manager = DRbObject.new_with_uri(uri.to_s)
-      if !managers.include?(manager) && manager.available_for?(hostname)
-        set_up_manager(manager, uri)
-        managers << manager
-        self.worker_size += manager.worker_size
+      Timeout.timeout(1) do
+        manager = DRbObject.new_with_uri(uri.to_s)
+        if !managers.include?(manager) && manager.available_for?(hostname)
+          set_up_manager(manager, uri)
+          managers << manager
+          self.worker_size += manager.worker_size
+        end
       end
+      rescue Timeout::Error
     end
 
     def gather_managers
