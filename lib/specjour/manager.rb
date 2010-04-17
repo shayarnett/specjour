@@ -48,9 +48,21 @@ module Specjour
     end
 
     def dispatch_workers
+      Dir.chdir(project_path) do
+        ENV['RAILS_ENV'] = 'test'
+        require Dir.pwd + '/config/environment'
+        require Dir.pwd + '/spec/spec_helper'
+      end
+      GC.copy_on_write_friendly = true if GC.respond_to?(:copy_on_write_friendly=)
       (1..worker_size).each do |index|
         worker_pids << fork do
-          exec("specjour --batch-size #{batch_size} #{'--log' if Specjour.log?} --do-work #{project_path},#{dispatcher_uri},#{index}")
+
+          # exec("specjour --batch-size #{batch_size} #{'--log' if Specjour.log?} --do-work #{project_path},#{dispatcher_uri},#{index}")
+          Signal.trap('INT') { Kernel.exit! }
+          puts "New Worker"
+          w = Worker.new(project_path, dispatcher_uri.to_s, index, batch_size)
+          w.run
+
           Kernel.exit!
         end
       end

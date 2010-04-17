@@ -1,9 +1,11 @@
 module Specjour
   module DbScrub
-    load 'Rakefile'
     extend self
 
     def scrub
+      puts Dir.pwd
+      load 'Rakefile'
+      puts Rails::Configuration.new.database_configuration[Rails.env]
       connect_to_database
       if pending_migrations?
         puts "Migrating schema for database #{ENV['TEST_ENV_NUMBER'] || 1}..."
@@ -16,6 +18,7 @@ module Specjour
     protected
 
     def connect_to_database
+      ActiveRecord::Base.establish_connection Rails::Configuration.new.database_configuration[Rails.env]
       connection
     rescue # assume the database doesn't exist
       Rake::Task['db:create'].invoke

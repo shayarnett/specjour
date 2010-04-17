@@ -60,6 +60,7 @@ module Specjour
       begin
         Timeout.timeout(10) do
           browser.browse '_druby._tcp' do |reply|
+            p reply
             if reply.flags.add?
               resolve_reply(reply)
             end
@@ -87,10 +88,13 @@ module Specjour
     end
 
     def resolve_reply(reply)
+      puts "resolving"
       DNSSD.resolve!(reply) do |resolved|
+        p resolved
         resolved_ip = ip_from_hostname(resolved.target)
         uri = URI::Generic.build :scheme => reply.service_name, :host => resolved_ip, :port => resolved.port
         fetch_manager(uri)
+        puts "done fetching"
         resolved.service.stop if resolved.service.started?
       end
     end

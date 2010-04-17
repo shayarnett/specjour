@@ -1,5 +1,6 @@
 module Specjour
   class Worker
+      require 'specjour/db_scrub'
     include Protocol
     include SocketHelpers
     attr_accessor :printer_uri
@@ -11,7 +12,6 @@ module Specjour
       @number = number.to_i
       @batch_size = batch_size.to_i
       self.printer_uri = printer_uri
-      GC.copy_on_write_friendly = true if GC.respond_to?(:copy_on_write_friendly=)
       Rspec::DistributedFormatter.batch_size = batch_size
       set_env_variables
     end
@@ -21,9 +21,11 @@ module Specjour
     end
 
     def run
+      puts "run called"
       printer.send_message(:ready)
       run_time = 0
       Dir.chdir(project_path)
+          DbScrub.scrub
       while !printer.closed? && data = printer.gets(TERMINATOR)
         test = load_object(data)
         if test
